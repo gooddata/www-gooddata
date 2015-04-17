@@ -23,7 +23,6 @@ wrapper funcitons for common actions.
 
 use strict;
 use warnings;
-
 use WWW::GoodData::Agent;
 use JSON;
 use URI;
@@ -384,6 +383,7 @@ sub create_project
 	my $template = shift;
 	my $driver= shift;
 	my $token = shift;
+	my $environment = shift;
 
 	# The redirect magic does not work for POSTs and we can't really
 	# handle 401s until the API provides reason for them...
@@ -395,6 +395,7 @@ sub create_project
 				# No hook to override this; use web UI
 				guidedNavigation => 1,
 				($driver ? (driver => $driver) : ()),
+				($environment ? (environment => $environment) : ()),
 				($token ? (authorizationToken => $token) : ())
 			},
 			meta => {
@@ -584,7 +585,6 @@ sub upload_upload_data
 	my $project = shift;
 	my $file = shift;
 	my $csv_fpath = shift;
-
 
 	# Parse the manifest
 	my $upload_info = decode_json (slurp_file ($file));
