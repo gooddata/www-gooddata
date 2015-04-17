@@ -1,4 +1,5 @@
 1.12
+ - Add environment support to create_project() method.
  - Add LICENSE file.
  - Add META.json and META.yml files.
  - Add minimal version of Perl.

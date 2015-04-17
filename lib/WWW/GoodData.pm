@@ -361,6 +361,7 @@ sub create_project
 	my $template = shift;
 	my $driver= shift;
 	my $token = shift;
+	my $environment = shift;
 
 	# The redirect magic does not work for POSTs and we can't really
 	# handle 401s until the API provides reason for them...
@@ -372,6 +373,7 @@ sub create_project
 				# No hook to override this; use web UI
 				guidedNavigation => 1,
 				($driver ? (driver => $driver) : ()),
+				($environment ? (environment => $environment) : ()),
 				($token ? (authorizationToken => $token) : ())
 			},
 			meta => {
