@@ -587,29 +587,41 @@ sub upload_upload_data
 	my $csv_fpath = shift;
 
 	# Parse the manifest
-	my $upload_info = decode_json (slurp_file ($file));
-	die "$file: not a SLI manifest"
-		unless $upload_info->{dataSetSLIManifest};
+	my $upload_info;
+	my $ds_name;
+	my $data_fname;
+	if ( $file ) {
+		$upload_info = decode_json (slurp_file ($file));
+		die "$file: not a SLI manifest"
+			unless $upload_info->{dataSetSLIManifest};
 
-	$csv_fpath = $upload_info->{dataSetSLIManifest}{file} unless $csv_fpath;
+		$csv_fpath = $upload_info->{dataSetSLIManifest}{file} unless $csv_fpath;
+		$ds_name = $upload_info->{dataSetSLIManifest}{dataSet};
+		$data_fname = $upload_info->{dataSetSLIManifest}{file};
+	} else {
+		$ds_name = 'upload-zip';
+		$data_fname = 'upload.zip';
+	}
 
 	# Construct unique URI in staging area to upload to
 	my $uploads = new URI ($self->get_uri ('uploads'));
 	$uploads->path_segments (
 		$uploads->path_segments,
-		$upload_info->{dataSetSLIManifest}{dataSet}.'-'.time.'-'.$$.'-'.(int rand 10000)
+		$ds_name.'-'.time.'-'.$$.'-'.(int rand 10000)
 	);
 	$self->{agent}->request (new HTTP::Request (MKCOL => $uploads));
 
 	# Upload the manifest
-	my $manifest = $uploads->clone;
-	$manifest->path_segments ($manifest->path_segments, 'upload_info.json');
-	$self->{agent}->request (new HTTP::Request (PUT => $manifest,
-		['Content-Type' => 'application/json'], encode_json ($upload_info)));
+	if ( $file ) {
+		my $manifest = $uploads->clone;
+		$manifest->path_segments ($manifest->path_segments, 'upload_info.json');
+		$self->{agent}->request (new HTTP::Request (PUT => $manifest,
+			['Content-Type' => 'application/json'], encode_json ($upload_info)));
+	}
 
 	# Upload CSV
 	my $csv = $uploads->clone;
-	$csv->path_segments ($csv->path_segments, $upload_info->{dataSetSLIManifest}{file});
+	$csv->path_segments ($csv->path_segments, $data_fname);
 	$self->{agent}->request (new HTTP::Request (PUT => $csv,
 		['Content-Type' => 'application/csv'],
 		(slurp_file ($csv_fpath)
