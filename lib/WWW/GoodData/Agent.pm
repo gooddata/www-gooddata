@@ -154,8 +154,12 @@ sub request
 	# Issue the request
 	my $response = $self->SUPER::request ($request, @args);
 
-	my $time_diff_str = sprintf( '%1.0d', (time() - $stime) * 1000 );
-	print "response: $response->{_rc} $response->{_msg} ($time_diff_str ms)\n";
+	printf
+		"response: %s %s (%s ms)\n",
+		$response->{_rc} // '',
+		$response->{_msg} // '',
+		sprintf( '%1.0d', (time() - $stime) * 1000 )
+	;
 	#use Data::Dumper; print Dumper( $response );
 
 	# Pass processed response from subrequest (redirect)
