@@ -645,9 +645,9 @@ sub upload_post_task
 	my $task = $self->{agent}->post (
 		$self->get_uri (new URI ($project),
 			{ category => 'self', type => 'project' }, # Validate it's a project
-			qw/metadata etl pull/),
+			qw/metadata etl pull2/),
 		{ pullIntegration => [$uploads->path_segments]->[-1] }
-	)->{pullTask}{uri};
+	)->{pull2Task}{links}{poll};
 
 	return $task;
 }
@@ -660,12 +660,16 @@ sub upload_poll
 	# Wait for the task to enter a stable state
 	my $result = $self->poll (
 		sub { $self->{agent}->get ($task) },
-		sub { shift->{taskStatus} !~ /^(RUNNING|PREPARED)$/ }
+		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
 	) or die 'Timed out waiting for integration to finish';
 
-	return if $result->{taskStatus} eq 'OK';
-	warn 'Upload finished with warnings' if $result->{taskStatus} eq 'WARNING';
-	die 'Upload finished with '.$result->{taskStatus}.' status';
+	return if $result->{wTaskStatus}{status} eq 'OK';
+
+	die
+		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n"
+		. $result->{wTaskStatus}{messages}[0]{error}{message} . "\nand parameters:\n"
+		. join("; ", @{ $result->{wTaskStatus}{messages}[0]{error}{parameters} } ) ."\n"
+	;
 }
 
 
