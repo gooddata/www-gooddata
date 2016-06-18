@@ -10,3 +10,4 @@
  - Rewrite COPYRIGHT section in doc to more descriptive
    'LICENSE AND COPYRIGHT'.
  - Rewrite tests to recursive way, dir per module.
+ - Switch to etl/pull2.
