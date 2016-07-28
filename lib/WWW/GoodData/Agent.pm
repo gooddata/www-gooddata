@@ -178,7 +178,7 @@ sub request
 	} unless $decoded;
 
 	# Error handling
-	unless ($response->is_success) {
+	if ( !$response->is_success && $response->code != 303 ) {
 		# Apache::Error exceptions lack error wrapper
 		$decoded = $decoded->{error} if exists $decoded->{error};
 		my $request_id = $response->header ('X-GDC-Request') || "";
