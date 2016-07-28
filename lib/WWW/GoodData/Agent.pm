@@ -28,6 +28,7 @@ use warnings;
 use base qw/LWP::UserAgent/;
 use JSON;
 use Time::HiRes qw/time/;
+use IO::Socket::SSL;
 
 our $VERSION = '1.0';
 
@@ -63,7 +64,7 @@ sub new
 	$self = $self->SUPER::new (@args);
 	if ( $self->can('ssl_opts') ) {
 		$self->ssl_opts( verify_hostname => 0 ) ;
-		$self->ssl_opts( SSL_verify_mode => 'SSL_VERIFY_NONE' );
+		$self->ssl_opts( SSL_verify_mode => SSL_VERIFY_NONE );
 	}
 	$self->{root} = $root;
 	$self->agent ("perl-WWW-GoodData/$VERSION ");
