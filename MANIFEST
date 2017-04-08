@@ -1,5 +1,6 @@
 bin/gdc				Client utility for GoodData REST-ful API
 Build.PL			Build script
+Changes
 CONTRIBUTING			How to add functionality
 ISSUES				API issues
 lib/LWP/Authen/Gooddata.pm	Handle GoodData HTTP authentication mechanism
