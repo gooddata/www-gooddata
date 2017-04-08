@@ -1,2 +1,5 @@
 1.12
  - Add LICENSE file.
+ - Fix missing use strict and use warning.
+ - Move maintance of module to Michal Josef Spacek.
+ - Rewrite tests to recursive way, dir per module.
