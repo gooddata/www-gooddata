@@ -1,7 +1,6 @@
 blib
 _build
 Build
-MANIFEST.*
 META.yml
 .sw?
 *.sw?
