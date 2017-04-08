@@ -10,7 +10,7 @@ my $build = Module::Build->new(
 	meta_merge => {
 		resources => {
 			bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-GoodData',
-			repository => 'https://github.com/lkundrak/www-gooddata',
+			repository => 'https://github.com/tupinek/www-gooddata',
 		}
 	},
 	configure_requires => {
