@@ -1,5 +1,6 @@
 1.12
  - Add LICENSE file.
+ - Add META.json and META.yml files.
  - Add minimal version of Perl.
  - Add README file.
  - Fix missing use strict and use warning.

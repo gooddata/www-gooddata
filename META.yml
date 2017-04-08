@@ -1,0 +1,39 @@
+---
+abstract: 'Client library for GoodData REST-ful API'
+author:
+  - 'Michal Josef Spacek <skim@cpan.org>'
+build_requires:
+  JSON: '0'
+  Test::Pod: '0'
+configure_requires:
+  Module::Build: '0'
+dynamic_config: 1
+generated_by: 'Module::Build version 0.422, CPAN::Meta::Converter version 2.143240'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: WWW-GoodData
+provides:
+  LWP::Authen::Gooddata:
+    file: lib/LWP/Authen/Gooddata.pm
+    version: '1.12'
+  WWW::GoodData:
+    file: lib/WWW/GoodData.pm
+    version: '1.12'
+  WWW::GoodData::Agent:
+    file: lib/WWW/GoodData/Agent.pm
+    version: '1.12'
+requires:
+  Getopt::Long: '2.36'
+  IO::Socket::SSL: '0'
+  JSON: '0'
+  LWP::UserAgent: '0'
+  Pod::Usage: '0'
+  Text::ParseWords: '0'
+  perl: '5.006'
+resources:
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-GoodData
+  license: http://dev.perl.org/licenses/
+  repository: https://github.com/tupinek/www-gooddata
+version: '1.12'
