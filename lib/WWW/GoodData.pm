@@ -737,6 +737,8 @@ L<WWW::GoodData::Agent> -- GoodData API-aware user agent
 
 =head1 COPYRIGHT
 
+Copyright 2017 Michal Josef Spacek
+
 Copyright 2011, 2012, 2013 Lubomir Rintel
 
 Copyright 2012, 2013 Adam Stulpa, Jan Orel, Tomas Janousek

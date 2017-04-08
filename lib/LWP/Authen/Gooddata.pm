@@ -100,6 +100,8 @@ available) for the client to negotiate.
 
 =head1 COPYRIGHT
 
+Copyright 2017 Michal Josef Spacek
+
 Copyright 2011, 2012, 2013 Lubomir Rintel
 
 This program is free software; you can redistribute it and/or modify it

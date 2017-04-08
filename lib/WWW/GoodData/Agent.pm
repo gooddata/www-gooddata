@@ -199,6 +199,8 @@ L<LWP::UserAgent> -- Perl HTTP client
 
 =head1 COPYRIGHT
 
+Copyright 2017 Michal Josef Spacek
+
 Copyright 2011, 2012, 2013 Lubomir Rintel
 
 Copyright 2012 Jan Orel
