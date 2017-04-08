@@ -6,6 +6,7 @@ ISSUES				API issues
 lib/LWP/Authen/Gooddata.pm	Handle GoodData HTTP authentication mechanism
 lib/WWW/GoodData.pm		Client library for GoodData REST-ful API
 lib/WWW/GoodData/Agent.pm	HTTP client for GoodData JSON-based API
+LICENSE
 MANIFEST			This list of files
 META.json
 META.yml			Distribution Metadata
