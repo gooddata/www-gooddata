@@ -3,6 +3,8 @@ package LWP::Authen::Gooddata;
 use strict;
 use warnings;
 
+our $VERSION = '1.12';
+
 =head1 NAME
 
 LWP::Authen::Gooddata - Handle GoodData HTTP authentication mechanism

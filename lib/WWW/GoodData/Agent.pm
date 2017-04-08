@@ -28,7 +28,7 @@ use warnings;
 use base qw/LWP::UserAgent/;
 use JSON;
 
-our $VERSION = '1.0';
+our $VERSION = '1.12';
 
 =head1 PROPERTIES
 

@@ -28,7 +28,7 @@ use WWW::GoodData::Agent;
 use JSON;
 use URI;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 our $root = new URI ('https://secure.gooddata.com/gdc');
 
 =head1 METHODS
