@@ -10,6 +10,7 @@ LICENSE
 MANIFEST			This list of files
 META.json
 META.yml			Distribution Metadata
+README
 t/LWP-Authen-Gooddata/01-use.t
 t/LWP-Authen-Gooddata/02-version.t
 t/WWW-GoodData-Agent/01-use.t

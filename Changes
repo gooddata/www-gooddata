@@ -1,5 +1,6 @@
 1.12
  - Add LICENSE file.
+ - Add README file.
  - Fix missing use strict and use warning.
  - Move maintance of module to Michal Josef Spacek.
  - Rewrite COPYRIGHT section in doc to more descriptive
