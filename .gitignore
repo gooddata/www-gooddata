@@ -5,3 +5,5 @@ Build
 *.sw?
 *.tar.gz
 WWW-GoodData-*
+MYMETA.json
+MYMETA.yml
