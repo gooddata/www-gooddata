@@ -28,6 +28,7 @@ my $build = Module::Build->new(
 		'Test::Pod' => 0,
 		'JSON' => 0,
 	},
+	recursive_test_files => 1,
 );
 
 $build->create_build_script;
