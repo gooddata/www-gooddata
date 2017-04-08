@@ -98,7 +98,7 @@ performance coupled with sanity of implementation). Probably an alternative
 mechanism should be provided (Basic or Digest, which are both widely
 available) for the client to negotiate.
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
 Copyright 2017 Michal Josef Spacek
 

@@ -197,7 +197,7 @@ L<LWP::UserAgent> -- Perl HTTP client
         
 =back
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
 Copyright 2017 Michal Josef Spacek
 
