@@ -1,5 +1,8 @@
 package LWP::Authen::Gooddata;
 
+use strict;
+use warnings;
+
 =head1 NAME
 
 LWP::Authen::Gooddata - Handle GoodData HTTP authentication mechanism
