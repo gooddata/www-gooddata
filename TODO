@@ -1,0 +1,10 @@
+TODO
+====
+1. Proverit  lib/LWP/Authen/Gooddata.pm »$agent->get ('/gdc/md');« v synopsis
+2. Byhodit LWP::Authen::Gooddata pryc z tohohle modulu, je to jiny ns
+3. V user agent by mel byt kontaktni mail, coz bude v budoucnu povinne
+   viz http://developer.gooddata.com/api/auth.html#/introduction/feedback-and-help 
+4.
+
+Applied
+=======
