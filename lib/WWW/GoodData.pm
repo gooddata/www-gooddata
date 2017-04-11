@@ -349,7 +349,7 @@ return its identifier.
 The list of valid project templates is available from the template server:
 L<https://secure.gooddata.com/projectTemplates/>.
 
-Valid db engine drivers are 'Pg' (default) and 'mysql'.
+Valid db engine drivers are 'Pg' (default) and 'vertica'.
 
 =cut
 

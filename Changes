@@ -4,6 +4,7 @@
  - Add META.json and META.yml files.
  - Add minimal version of Perl.
  - Add README file.
+ - Fix database driver in doc of create_project.
  - Fix missing use strict and use warning.
  - Move maintance of module to Michal Josef Spacek.
  - Rewrite COPYRIGHT section in doc to more descriptive
