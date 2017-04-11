@@ -89,7 +89,7 @@ sub new {
 		my ($request, $ua, $h) = @_;
 		my $output = $request->method.' '.$request->uri_canonical;
 		my $content = $request->content;
-		if (defined $content && $content ne '') {
+		if ($request->method eq 'POST' && defined $content && $content ne '') {
 			$content = $self->_hide_password($content);
 			$output .= ' '.$content;
 		}
