@@ -55,6 +55,17 @@ report exports or data uploads. See B<poll>.
 
 Defaults to 3600 (delay of one hour).
 
+=item B<verbose>
+
+Adds handler for printing of request information to agent When versbose mode is set.
+Password in 'postUserLogin' parameter will be hidden.
+
+Examples of verbose output:
+ GET https://secure.gooddata.com/gdc
+ POST https://secure.gooddata.com/gdc/account/login {"postUserLogin":{"login":"bear@gooddata.com","verify_level":2,"remember":0,"password":"***"}}
+
+Defaults to 0.
+
 =back
 
 =cut
@@ -66,6 +77,20 @@ sub new
 	bless $self, $class;
 	$self->{agent} ||= new WWW::GoodData::Agent ($root);
 	$self->{retries} ||= 3600;
+	$self->{verbose} ||= 0;
+
+	$self->{agent}->add_handler('request_prepare', sub {
+		my ($request, $ua, $h) = @_;
+		my $output = $request->method.' '.$request->uri_canonical;
+		my $content = $request->content;
+		if (defined $content && $content ne '') {
+			$content = $self->_hide_password($content);
+			$output .= ' '.$content;
+		}
+		print "$output\n";
+		return;
+	}) if $self->{verbose};
+
 	return $self;
 }
 
@@ -713,6 +738,15 @@ sub slurp_file
         my $file = shift;
         open (my $fh, '<', $file) or die "$file: $!";
         return join '', <$fh>;
+}
+
+sub _hide_password {
+	my ($self, $content) = @_;
+	return $content if $content !~ 'postUserLogin';
+	my $content_json = decode_json($content);
+	return $content unless exists $content_json->{postUserLogin}->{password};
+	$content_json->{postUserLogin}->{password} = '***';
+	return encode_json($content_json);
 }
 
 =back
