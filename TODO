@@ -13,11 +13,13 @@ TODO
    MJ rika, ze by to mohlo byt v https://msa-dev.na.intgdc.com/gdc/md/ciuh6ltdvyg6m4el9347wudr9rbzzcyw/validate
 8. upload_upload_data je vylozene pro upload dat na webdav. Takze projit a
    nechat
-9. upload_poll prejmenovat na poll? Prepsat dovnitr poll(). $task je uri, ktere
-   se polluje
 10.
 
 Applied
 =======
 4. DESTROY default - moznost vypnout
+OK [20170413] skim
+
+9. upload_poll prejmenovat na poll? Prepsat dovnitr poll(). $task je uri, ktere
+   se polluje
 OK [20170413] skim

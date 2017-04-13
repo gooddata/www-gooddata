@@ -600,16 +600,31 @@ sub upload
 			|| die 'No CSV file specified in SLI manifest')));
 
 	# Trigger the integration
-	my $task = $self->{agent}->post (
+	my $task_url = $self->{agent}->post (
 		$self->get_uri (new URI ($project),
 			{ category => 'self', type => 'project' }, # Validate it's a project
 			qw/metadata etl pull2/),
 		{ pullIntegration => [$uploads->path_segments]->[-1] }
 	)->{pull2Task}{links}{poll};
 
+	return $self->poll ($task_url);
+}
+
+=item B<poll> TASK_URL
+
+Periodically checks status of task page and check 'wTaskStatus':'status' for 'RUNNING'.
+
+Returns undef is status is OK.
+
+=cut
+
+sub poll
+{
+        my ($self, $task_url) = @_;
+
 	# Wait for the task to enter a stable state
-	my $result = $self->poll (
-		sub { $self->{agent}->get ($task) },
+	my $result = $self->_poll (
+		sub { $self->{agent}->get ($task_url) },
 		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
 	) or die 'Timed out waiting for integration to finish';
 
@@ -622,22 +637,9 @@ sub upload
 	;
 }
 
-=item B<poll> BODY CONDITION
-
-Should only be used internally.
-
-Run BODY passing its return value to call to CONDITION until it
-evaluates to true or B<retries> (see properties) times out.
-
-Returns value is of last iteration of BODY in case
-CONDITION succeeds, otherwise undefined (in case of timeout).
-
-=cut
-
-sub poll
+sub _poll
 {
-        my $self = shift;
-        my ($body, $cond) = @_;
+        my ($self, $body, $cond) = @_;
         my $retries = $self->{retries};
 
         while ($retries--) {
@@ -757,7 +759,7 @@ sub dd_pull {
 	my ($self, $project, $zip_file, $datasets) = @_;
 
 	# Trigger the integration
-	my $task = $self->{agent}->post(
+	my $task_url = $self->{agent}->post(
 		$self->get_uri (URI->new($project),
 			{ category => 'self', type => 'project' }, # Validate it's a project
 			qw/metadata datedimension pull/),
@@ -769,19 +771,7 @@ sub dd_pull {
 		}
 	)->{asyncTask}{link}{poll};
 
-	# Wait for the task to enter a stable state
-	my $result = $self->poll (
-		sub { $self->{agent}->get ($task) },
-		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
-	) or die 'Timed out waiting for integration to finish';
-
-	return if $result->{wTaskStatus}{status} eq 'OK';
-
-	die
-		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n"
-		. $result->{wTaskStatus}{messages}[0]{error}{message} . "\nand parameters:\n"
-		. join("; ", @{ $result->{wTaskStatus}{messages}[0]{error}{parameters} } ) ."\n"
-	;
+	return $self->poll ($task_url);
 }
 
 sub slurp_file

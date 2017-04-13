@@ -10,6 +10,8 @@
  - Fix database driver in doc of create_project.
  - Fix missing use strict and use warning.
  - Move maintance of module to Michal Josef Spacek.
+ - Move poll() method to private _poll and create new implementation of poll()
+   with standardy async polling.
  - Rewrite COPYRIGHT section in doc to more descriptive
    'LICENSE AND COPYRIGHT'.
  - Rewrite tests to recursive way, dir per module.
