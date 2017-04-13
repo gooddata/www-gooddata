@@ -1,10 +1,22 @@
 TODO
 ====
 1. Proverit  lib/LWP/Authen/Gooddata.pm »$agent->get ('/gdc/md');« v synopsis
-2. Byhodit LWP::Authen::Gooddata pryc z tohohle modulu, je to jiny ns
+2. Vyhodit LWP::Authen::Gooddata pryc z tohohle modulu, je to jiny ns
 3. V user agent by mel byt kontaktni mail, coz bude v budoucnu povinne
    viz http://developer.gooddata.com/api/auth.html#/introduction/feedback-and-help 
-4.
+4. DESTROY default - moznost vypnout
+5. login vylepseni s cache_url - zjistit jak se to vola a navrhnout nejake
+   reseni
+6. -	$self->cookie_jar ({}); - zjistit jak vytvaret objekt s nejake
+   serializace
+7. Do not consider http code 303 as error - najit nejakou 303 v bearovi resources
+   MJ rika taskman - redirect tasku na jiny task
+   MJ rika, ze by to mohlo byt v https://msa-dev.na.intgdc.com/gdc/md/ciuh6ltdvyg6m4el9347wudr9rbzzcyw/validate
+8. upload_upload_data je vylozene pro upload dat na webdav. Takze projit a
+   nechat
+9. upload_poll prejmenovat na poll? Prepsat dovnitr poll(). $task je uri, ktere
+   se polluje
+10.
 
 Applied
 =======
