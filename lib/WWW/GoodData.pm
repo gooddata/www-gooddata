@@ -739,6 +739,43 @@ sub DESTROY
 	$self->logout if $self->{login};
 }
 
+=item B<dd_pull> PROJECT ZIP_FILE DATASETS
+
+Integrate a custom date dimension load via Single Loading Interface (SLI).
+
+=cut
+
+sub dd_pull {
+	my ($self, $project, $zip_file, $datasets) = @_;
+
+	# Trigger the integration
+	my $task = $self->{agent}->post(
+		$self->get_uri (URI->new($project),
+			{ category => 'self', type => 'project' }, # Validate it's a project
+			qw/metadata datedimension pull/),
+		{
+			dateIntegration => {
+				file => $zip_file,
+				datasets => $datasets,
+			},
+		}
+	)->{asyncTask}{link}{poll};
+
+	# Wait for the task to enter a stable state
+	my $result = $self->poll (
+		sub { $self->{agent}->get ($task) },
+		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
+	) or die 'Timed out waiting for integration to finish';
+
+	return if $result->{wTaskStatus}{status} eq 'OK';
+
+	die
+		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n"
+		. $result->{wTaskStatus}{messages}[0]{error}{message} . "\nand parameters:\n"
+		. join("; ", @{ $result->{wTaskStatus}{messages}[0]{error}{parameters} } ) ."\n"
+	;
+}
+
 sub slurp_file
 {
         my $file = shift;
