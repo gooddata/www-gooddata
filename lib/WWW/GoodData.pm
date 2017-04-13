@@ -48,6 +48,12 @@ blessed, otherwise a new one is created. Possible properties include:
 
 A L<WWW::GoodData::Agent> instance to use.
 
+=item B<auto_destroy>
+
+Sets automatic logout in destroying object.
+
+Defaults to 1.
+
 =item B<retries>
 
 A number of retries to obtain results of asynchronous tasks, such as
@@ -76,6 +82,7 @@ sub new
 	my $self = shift || {};
 	bless $self, $class;
 	$self->{agent} ||= new WWW::GoodData::Agent ($root);
+	$self->{auto_destroy} //= 1;
 	$self->{retries} ||= 3600;
 	$self->{verbose} ||= 0;
 
@@ -736,6 +743,7 @@ Log out the session with B<logout> unless not logged in.
 sub DESTROY
 {
 	my $self = shift;
+	return unless $self->{auto_destroy};
 	$self->logout if $self->{login};
 }
 

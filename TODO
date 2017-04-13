@@ -4,7 +4,6 @@ TODO
 2. Vyhodit LWP::Authen::Gooddata pryc z tohohle modulu, je to jiny ns
 3. V user agent by mel byt kontaktni mail, coz bude v budoucnu povinne
    viz http://developer.gooddata.com/api/auth.html#/introduction/feedback-and-help 
-4. DESTROY default - moznost vypnout
 5. login vylepseni s cache_url - zjistit jak se to vola a navrhnout nejake
    reseni
 6. -	$self->cookie_jar ({}); - zjistit jak vytvaret objekt s nejake
@@ -20,3 +19,5 @@ TODO
 
 Applied
 =======
+4. DESTROY default - moznost vypnout
+OK [20170413] skim

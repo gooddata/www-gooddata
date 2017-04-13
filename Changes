@@ -1,4 +1,6 @@
 1.12
+=======
+ - Add 'auto_destroy' constructor parameter and check it in DESTROY().
  - Add dd_pull() method.
  - Add environment support to create_project() method.
  - Add LICENSE file.
