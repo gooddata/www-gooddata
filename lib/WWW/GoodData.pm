@@ -8,7 +8,7 @@ WWW::GoodData - Client library for GoodData REST-ful API
 
   use WWW::GoodData;
   my $gdc = new WWW::GoodData;
-  print $gdc->get_uri ('md', { title => 'My Project' });
+  print $gdc->get_uri('md', { title => 'My Project' });
 
 =head1 DESCRIPTION
 
@@ -29,7 +29,7 @@ use JSON;
 use URI;
 
 our $VERSION = '1.12';
-our $root = new URI ('https://secure.gooddata.com/gdc');
+our $root = URI->new('https://secure.gooddata.com/gdc');
 
 =head1 METHODS
 
@@ -76,12 +76,11 @@ Defaults to 0.
 
 =cut
 
-sub new
-{
+sub new {
 	my $class = shift;
 	my $self = shift || {};
 	bless $self, $class;
-	$self->{agent} ||= new WWW::GoodData::Agent ($root);
+	$self->{agent} ||= WWW::GoodData::Agent->new($root);
 	$self->{auto_destroy} //= 1;
 	$self->{retries} ||= 3600;
 	$self->{verbose} ||= 0;
@@ -103,15 +102,14 @@ sub new
 
 # API hierarchy traversal Cache
 our %links;
-sub get_canonical_links
-{
+sub get_canonical_links {
 	my $self = shift;
 	my $root = shift;
 	my @path = map { ref $_ ? $_ : { category => $_ } } @_;
 	my $link = shift @path;
 
 	unless ($links{$root}) {
-		my $response = $self->{agent}->get ($root);
+		my $response = $self->{agent}->get($root);
 		# Various ways to get the links
 		if (exists $response->{about}) {
 			# Ordinary structure with about section
@@ -135,7 +133,7 @@ sub get_canonical_links
 				# Metadata with interesting information outside "links"
 				if (exists $element->{$type}{links}{self}
 					and exists $element->{$type}{meta}) {
-					my $link = new URI ($element->{$type}{links}{self})->abs ($root);
+					my $link = URI->new($element->{$type}{links}{self})->abs($root);
 					push @{$links{$root}}, {
 						%{$element->{$type}{meta}},
 						category => $type,
@@ -147,7 +145,7 @@ sub get_canonical_links
 
 				# The links themselves
 				foreach my $category (keys %{$element->{$type}{links}}) {
-					my $link = new URI ($element->{$type}{links}{$category})->abs ($root);
+					my $link = URI->new($element->{$type}{links}{$category})->abs($root);
 					push @{$links{$root}}, {
 						structure => $structure,
 						category => $category,
@@ -163,7 +161,7 @@ sub get_canonical_links
 	}
 
 	# Canonicalize the links
-	$_->{link} = new URI ($_->{link})->abs ($root) foreach @{$links{$root}};
+	$_->{link} = URI->new($_->{link})->abs($root) foreach @{$links{$root}};
 
 	my @matches = grep {
 		my $this_link = $_;
@@ -182,22 +180,21 @@ sub get_canonical_links
 	die 'Ambigious path' unless scalar @matches == 1;
 
 	# Traverse further
-	return $self->get_canonical_links ($matches[0]->{link}, @path);
+	return $self->get_canonical_links($matches[0]->{link}, @path);
 }
 
 # This is a 'normalized' version, for convenience and compatibility
-sub get_links
-{
+sub get_links {
 	my $self = shift;
 	my $root = (ref $_[0] and ref $_[0] ne 'HASH') ? shift : '';
 
 	# Canonicalize URIs
-	$root = new URI ($root)->abs ($self->{agent}{root});
+	$root = URI->new($root)->abs($self->{agent}{root});
 
 	# And decanonicalize, ommiting the scheme and authority part if possible
-	my @links = $self->get_canonical_links ($root, @_);
-	$_->{link} = $_->{link}->rel ($root)->authority
-		?  $_->{link} : new URI ($_->{link}->path) foreach @links;
+	my @links = $self->get_canonical_links($root, @_);
+	$_->{link} = $_->{link}->rel($root)->authority
+		?  $_->{link} : URI->new($_->{link}->path) foreach @links;
 
 	return @links;
 }
@@ -211,15 +208,14 @@ PATH is an array of dictionaries, where each key-value pair
 matches properties of a link. If a plain string is specified,
 it is considered to be a match against B<category> property:
 
-  $gdc->links ('md', { 'category' => 'projects' });
+  $gdc->links('md', { 'category' => 'projects' });
 
 The above call returns a list of all projects, with links to
 their metadata resources.
 
 =cut
 
-sub links
-{
+sub links {
 	my @links = get_links @_;
 	return @links if @links;
 	%links = ();
@@ -234,8 +230,7 @@ structure.
 
 =cut
 
-sub get_uri
-{
+sub get_uri {
 	[links @_]->[0]{link};
 }
 
@@ -245,12 +240,11 @@ Obtain a SST (login token).
 
 =cut
 
-sub login
-{
+sub login {
 	my $self = shift;
 	my ($login, $password) = @_;
 
-	$self->{login} = $self->{agent}->post ($self->get_uri ('login'),
+	$self->{login} = $self->{agent}->post($self->get_uri('login'),
 		{postUserLogin => {
 			login => $login,
 			password => $password,
@@ -269,19 +263,18 @@ Is called upon destruction of the GoodData client instance.
 
 =cut
 
-sub logout
-{
+sub logout {
 	my $self = shift;
 
 	die 'Not logged in' unless defined $self->{login};
 
-	$self->{agent}->delete ($self->{login}{userLogin}{state},
+	$self->{agent}->delete($self->{login}{userLogin}{state},
 		'X-GDC-AuthSST' => $self->{agent}{GDCAuthSST});
 
 	# Maybe this needs to go to the agent itself?
 	delete $self->{agent}{GDCAuthSST};
 	delete $self->{agent}{GDCAuthTT};
-	$self->{agent}->default_header ('X-GDCAuthTT' => undef);
+	$self->{agent}->default_header('X-GDCAuthTT' => undef);
 
 	$self->{login} = undef;
 }
@@ -292,15 +285,14 @@ Change user password given the old and new password.
 
 =cut
 
-sub change_passwd
-{
+sub change_passwd {
 	my $self = shift;
 	my $old_passwd = shift or die 'No old password given';
 	my $new_passwd = shift or die 'No new password given';
 
 	die 'Not logged in' unless defined $self->{login};
 
-	my $profile = $self->{agent}->get ($self->{login}{userLogin}{profile});
+	my $profile = $self->{agent}->get($self->{login}{userLogin}{profile});
 	my $new_profile = {
 		'accountSetting' => {
 			'old_password' => $old_passwd,
@@ -311,7 +303,7 @@ sub change_passwd
 		}
 	};
 
-	$self->{agent}->put ($self->{login}{userLogin}{profile}, $new_profile);
+	$self->{agent}->put($self->{login}{userLogin}{profile}, $new_profile);
 }
 
 =item B<projects>
@@ -320,11 +312,11 @@ Return array of links to project resources on metadata server.
 
 =cut
 
-sub projects
-{
+sub projects {
 	my $self = shift;
+
 	die 'Not logged in' unless $self->{login};
-	$self->get_links (new URI ($self->{login}{userLogin}{profile}),
+	$self->get_links(URI->new($self->{login}{userLogin}{profile}),
 		qw/projects project/);
 }
 
@@ -334,17 +326,15 @@ Delete a project given its identifier.
 
 =cut
 
-sub delete_project
-{
-	my $self = shift;
-	my $project = shift;
+sub delete_project {
+	my ($self, $project) = @_;
 
 	# Instead of directly DELETE-ing the URI gotten, we check
 	# the existence of a project with such link, as a sanity check
-	my $uri = $self->get_uri (new URI ($project),
+	my $uri = $self->get_uri(URI->new($project),
 		{ category => 'self', type => 'project' }) # Validate it's a project
 		or die "No such project: $project";
-	$self->{agent}->delete ($uri);
+	$self->{agent}->delete($uri);
 }
 
 =item B<create_project> TITLE SUMMARY TEMPLATE DRIVER TOKEN
@@ -360,8 +350,7 @@ Valid db engine drivers are 'Pg' (default) and 'vertica'.
 
 =cut
 
-sub create_project
-{
+sub create_project {
 	my $self = shift;
 	my $title = shift or die 'No title given';
 	my $summary = shift || '';
@@ -372,9 +361,9 @@ sub create_project
 
 	# The redirect magic does not work for POSTs and we can't really
 	# handle 401s until the API provides reason for them...
-	$self->{agent}->get ($self->get_uri ('token'));
+	$self->{agent}->get($self->get_uri('token'));
 
-	return $self->{agent}->post ($self->get_uri ('projects'), {
+	return $self->{agent}->post($self->get_uri('projects'), {
 		project => {
 			content => {
 				# No hook to override this; use web UI
@@ -400,8 +389,7 @@ Returns user identifier (URI).
 
 =cut
 
-sub create_user
-{
+sub create_user {
 	my $self = shift;
 	my $domain_uri = shift || die "No domain specified";
 	my $email = shift || die "Email must be specified";
@@ -413,7 +401,7 @@ sub create_user
 	my $company = shift || '';
 	my $sso_provider = shift;
 
-	return $self->{agent}->post ($domain_uri."/users", { #TODO links does not exists in REST API
+	return $self->{agent}->post($domain_uri."/users", { #TODO links does not exists in REST API
 		accountSetting => {
 			login => $login,
 			email => $email,
@@ -435,13 +423,11 @@ Return array of project roles.
 
 =cut
 
-sub get_roles
-{
-	my $self = shift;
-	my $project = shift;
+sub get_roles {
+	my ($self, $project) = @_;
 
-	return $self->{agent}->get (
-		$self->get_uri (new URI($project), 'roles'))->{projectRoles}{roles};
+	return $self->{agent}->get(
+		$self->get_uri(URI->new($project), 'roles'))->{projectRoles}{roles};
 }
 =item B<reports> PROJECT
 
@@ -449,15 +435,15 @@ Return array of links to repoort resources on metadata server.
 
 =cut
 
-sub reports
-{
-	my $self = shift;
-	my $project = shift;
+sub reports {
+	my ($self, $project) = @_;
 
 	die 'Not logged in' unless $self->{login};
-	$self->get_links (new URI ($project),
+	$self->get_links(
+		URI->new($project),
 		{ category => 'self', type => 'project' }, # Validate it's a project
-		qw/metadata query reports/, {});
+		qw/metadata query reports/, {},
+	);
 }
 
 =item B<compute_report> REPORT
@@ -466,14 +452,12 @@ Trigger a report computation and return the URI of the result resource.
 
 =cut
 
-sub compute_report
-{
-	my $self = shift;
-	my $report = shift;
+sub compute_report {
+	my ($self, $report) = @_;
 
-	return $self->{agent}->post (
-		$self->get_uri (qw/xtab xtab-executor3/),
-		{ report_req => { report => ''.$report }}
+	return $self->{agent}->post(
+		$self->get_uri(qw/xtab xtab-executor3/),
+		{ report_req => { report => ''.$report }},
 	);
 }
 
@@ -484,30 +468,31 @@ wait for completion and return raw data in desired format.
 
 =cut
 
-sub export_report
-{
-	my $self = shift;
-	my $report = shift;
-	my $format = shift;
+sub export_report {
+	my ($self, $report, $format) = @_;
 
 	# Compute the report
-	my $result = $self->{agent}->post (
-		$self->get_uri (qw/report-exporter exporter-executor/),
-		{ result_req => { format => $format,
-			result => $self->compute_report ($report) }}
+	my $result = $self->{agent}->post(
+		$self->get_uri(qw/report-exporter exporter-executor/),
+		{
+			result_req => {
+				format => $format,
+				result => $self->compute_report($report),
+			},
+		},
 	);
 
 	# This is for new release, where location is finally set correctly;
 	$result = $result->{uri} if ref $result eq 'HASH';
 
 	# Trigger the export
-	my $exported = $self->poll (
-		sub { $self->{agent}->get ($result) },
+	my $exported = $self->poll(
+		sub { $self->{agent}->get($result) },
 		sub { $_[0] and exists $_[0]->{raw} and $_[0]->{raw} ne 'null' }
 	) or die 'Timed out waiting for report to export';
 
 	# Follow the link
-	$exported = $self->{agent}->get ($exported->{uri}) if exists $exported->{uri};
+	$exported = $self->{agent}->get($exported->{uri}) if exists $exported->{uri};
 
 	# Gotten the correctly coded result?
 	my $wanted = $format;
@@ -529,14 +514,18 @@ Return picture of Logical Data Model (LDM) in PNG format.
 
 =cut
 
-sub ldm_picture
-{
+sub ldm_picture {
 	my $self = shift;
 	my $project = shift;
 
-	my $model = $self->{agent}->get ($self->{agent}->get (
-		$self->get_uri (new URI ($project),
-			{ category => 'ldm' }))->{uri});
+	my $model = $self->{agent}->get(
+		$self->{agent}->get(
+			$self->get_uri(
+				URI->new($project),
+				{ category => 'ldm' },
+			),
+		)->{uri},
+	);
 	die 'Expected PNG image' unless $model->{type} eq 'image/png';
 
 	return $model->{raw};
@@ -548,18 +537,19 @@ Execute MAQL statement for a project.
 
 =cut
 
-sub ldm_manage
-{
-	my $self = shift;
-	my $project = shift;
-	my $maql = shift;
+sub ldm_manage {
+	my ($self, $project, $maql) = @_;
 
 	$maql = "# WWW::GoodData MAQL execution\n$maql";
 	chomp $maql;
 
-	$self->{agent}->post (
-		$self->get_uri (new URI ($project), qw/metadata ldm ldm-manage/),
-		{ manage => { maql => $maql }});
+	$self->{agent}->post(
+		$self->get_uri(
+			URI->new($project),
+			qw/metadata ldm ldm-manage/,
+		),
+		{ manage => { maql => $maql } },
+	);
 }
 
 =item B<upload> PROJECT MANIFEST
@@ -568,46 +558,62 @@ Upload and integrate a new data load via Single Loading Interface (SLI).
 
 =cut
 
-sub upload
-{
-	my $self = shift;
-	my $project = shift;
-	my $file = shift;
+sub upload {
+	my ($self, $project, $file) = @_;
 
 	# Parse the manifest
-	my $upload_info = decode_json (slurp_file ($file));
+	my $upload_info = decode_json(slurp_file($file));
 	die "$file: not a SLI manifest"
 		unless $upload_info->{dataSetSLIManifest};
 
 	# Construct unique URI in staging area to upload to
-	my $uploads = new URI ($self->get_uri ('uploads'));
-	$uploads->path_segments ($uploads->path_segments,
-		$upload_info->{dataSetSLIManifest}{dataSet}.'-'.time);
-	$self->{agent}->request (new HTTP::Request (MKCOL => $uploads));
+	my $uploads = URI->new($self->get_uri('uploads'));
+	$uploads->path_segments(
+		$uploads->path_segments,
+		$upload_info->{dataSetSLIManifest}{dataSet}.'-'.time,
+	);
+	$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
 
 	# Upload the manifest
 	my $manifest = $uploads->clone;
-	$manifest->path_segments ($manifest->path_segments, 'upload_info.json');
-	$self->{agent}->request (new HTTP::Request (PUT => $manifest,
-		['Content-Type' => 'application/json'], encode_json ($upload_info)));
+	$manifest->path_segments($manifest->path_segments, 'upload_info.json');
+	$self->{agent}->request(
+		HTTP::Request->new(
+			PUT => $manifest,
+			['Content-Type' => 'application/json'],
+			encode_json($upload_info),
+		),
+	);
 
 	# Upload CSV
 	my $csv = $uploads->clone;
-	$csv->path_segments ($csv->path_segments, $upload_info->{dataSetSLIManifest}{file});
-	$self->{agent}->request (new HTTP::Request (PUT => $csv,
-		['Content-Type' => 'application/csv'],
-		(slurp_file ($upload_info->{dataSetSLIManifest}{file})
-			|| die 'No CSV file specified in SLI manifest')));
+	$csv->path_segments($csv->path_segments, $upload_info->{dataSetSLIManifest}{file});
+	$self->{agent}->request(
+		HTTP::Request->new(
+			PUT => $csv,
+			['Content-Type' => 'application/csv'],
+			(slurp_file($upload_info->{dataSetSLIManifest}{file})
+				|| die 'No CSV file specified in SLI manifest')
+		),
+	);
 
 	# Trigger the integration
-	my $task_url = $self->{agent}->post (
-		$self->get_uri (new URI ($project),
-			{ category => 'self', type => 'project' }, # Validate it's a project
-			qw/metadata etl pull2/),
-		{ pullIntegration => [$uploads->path_segments]->[-1] }
+	my $task_url = $self->{agent}->post(
+		$self->get_uri(
+			URI->new($project),
+
+			# Validate it's a project
+			{
+				category => 'self',
+				type => 'project',
+			},
+			qw/metadata etl pull2/,
+		), {
+			pullIntegration => [$uploads->path_segments]->[-1],
+		}
 	)->{pull2Task}{links}{poll};
 
-	return $self->poll ($task_url);
+	return $self->poll($task_url);
 }
 
 =item B<poll> TASK_URL
@@ -618,30 +624,28 @@ Returns undef is status is OK.
 
 =cut
 
-sub poll
-{
+sub poll {
         my ($self, $task_url) = @_;
 
 	# Wait for the task to enter a stable state
-	my $result = $self->_poll (
-		sub { $self->{agent}->get ($task_url) },
+	my $result = $self->_poll(
+		sub { $self->{agent}->get($task_url) },
 		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
 	) or die 'Timed out waiting for integration to finish';
 
 	return if $result->{wTaskStatus}{status} eq 'OK';
 
 	die
-		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n"
-		. $result->{wTaskStatus}{messages}[0]{error}{message} . "\nand parameters:\n"
-		. join("; ", @{ $result->{wTaskStatus}{messages}[0]{error}{parameters} } ) ."\n"
+		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n".
+		$result->{wTaskStatus}{messages}[0]{error}{message}."\nand parameters:\n".
+		join("; ", @{$result->{wTaskStatus}{messages}[0]{error}{parameters}})."\n"
 	;
 }
 
-sub _poll
-{
+sub _poll {
         my ($self, $body, $cond) = @_;
-        my $retries = $self->{retries};
 
+        my $retries = $self->{retries};
         while ($retries--) {
                 my $ret = $body->();
                 return $ret if $cond->($ret);
@@ -657,8 +661,7 @@ Create a new metadata object of type TYPE with EXPRESSION as the only content.
 
 =cut
 
-sub create_object_with_expression
-{
+sub create_object_with_expression {
 	my $self = shift;
 	my $project = shift;
 	my $uri = shift;
@@ -668,22 +671,24 @@ sub create_object_with_expression
 	my $expression = shift or die 'No expression given';
 
 	if (defined $uri) {
-		$uri = new URI ($uri);
+		$uri = URI->new($uri);
 	} else {
-		$uri = $self->get_uri (new URI ($project), qw/metadata obj/);
+		$uri = $self->get_uri(URI->new($project), qw/metadata obj/);
 	}
 
-	return $self->{agent}->post (
+	return $self->{agent}->post(
 		$uri,
-		{ $type => {
-			content => {
-				expression => $expression
+		{
+			$type => {
+				content => {
+					expression => $expression
+				},
+				meta => {
+					summary => $summary,
+					title => $title,
+				}
 			},
-			meta => {
-				summary => $summary,
-				title => $title,
-			}
-		}}
+		},
 	)->{uri};
 }
 
@@ -693,8 +698,7 @@ Create a new reportDefinition in metadata.
 
 =cut
 
-sub create_report_definition
-{
+sub create_report_definition {
 	my $self = shift;
 	my $project = shift;
 	my $uri = shift;
@@ -705,34 +709,36 @@ sub create_report_definition
 	my $filters = shift || [];
 
 	if (defined $uri) {
-		$uri = new URI ($uri);
+		$uri = URI->new($uri);
 	} else {
-		$uri = $self->get_uri (new URI ($project), qw/metadata obj/);
+		$uri = $self->get_uri(URI->new($project), qw/metadata obj/);
 	}
 
-	return $self->{agent}->post (
+	return $self->{agent}->post(
 		$uri,
-		{ reportDefinition => {
-			content => {
-				filters => [ map +{ expression => $_ }, @$filters ],
-				grid => {
-					columns => [ "metricGroup" ],
-					metrics => [ map +{ alias => '', uri => $_ }, @$metrics ],
-					rows => [ map +{ attribute => { alias => '', uri => $_,
-						totals => [[]] } }, @$dim ],
-					sort => {
-						columns => [],
-						rows => [],
+		{
+			reportDefinition => {
+				content => {
+					filters => [ map +{ expression => $_ }, @$filters ],
+					grid => {
+						columns => [ "metricGroup" ],
+						metrics => [ map +{ alias => '', uri => $_ }, @$metrics ],
+						rows => [ map +{ attribute => { alias => '', uri => $_,
+							totals => [[]] } }, @$dim ],
+						sort => {
+							columns => [],
+							rows => [],
+						},
+						columnWidths => [],
 					},
-					columnWidths => []
+					format => "grid",
 				},
-				format => "grid"
+				meta => {
+					summary => $summary,
+					title => $title,
+				},
 			},
-			meta => {
-				summary => $summary,
-				title => $title,
-			}
-		}}
+		},
 	)->{uri};
 }
 
@@ -742,8 +748,7 @@ Log out the session with B<logout> unless not logged in.
 
 =cut
 
-sub DESTROY
-{
+sub DESTROY {
 	my $self = shift;
 	return unless $self->{auto_destroy};
 	$self->logout if $self->{login};
@@ -760,22 +765,27 @@ sub dd_pull {
 
 	# Trigger the integration
 	my $task_url = $self->{agent}->post(
-		$self->get_uri (URI->new($project),
-			{ category => 'self', type => 'project' }, # Validate it's a project
-			qw/metadata datedimension pull/),
-		{
+		$self->get_uri(
+			URI->new($project),
+
+			# Validate it's a project
+			{
+				category => 'self',
+				type => 'project',
+			},
+			qw/metadata datedimension pull/
+		), {
 			dateIntegration => {
 				file => $zip_file,
 				datasets => $datasets,
 			},
-		}
+		},
 	)->{asyncTask}{link}{poll};
 
-	return $self->poll ($task_url);
+	return $self->poll($task_url);
 }
 
-sub slurp_file
-{
+sub slurp_file {
         my $file = shift;
         open (my $fh, '<', $file) or die "$file: $!";
         return join '', <$fh>;
