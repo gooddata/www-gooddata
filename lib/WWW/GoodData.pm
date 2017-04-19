@@ -795,6 +795,37 @@ sub create_report_definition
 	)->{uri};
 }
 
+=item B<dd_pull> PROJECT ZIP_FILE DATASETS
+
+Integrate a custom date dimension load via Single Loading Interface (SLI).
+
+=cut
+
+sub dd_pull {
+	my ($self, $project, $zip_file, $datasets) = @_;
+
+	# Trigger the integration
+	my $task_url = $self->{agent}->post(
+		$self->get_uri(
+			URI->new($project),
+
+			# Validate it's a project
+			{
+				category => 'self',
+				type => 'project',
+			},
+			qw/metadata datedimension pull/
+		), {
+			dateIntegration => {
+				file => $zip_file,
+				datasets => $datasets,
+			},
+		},
+	)->{asyncTask}{link}{poll};
+
+	return $self->upload_poll($task_url);
+}
+
 =item B<DESTROY>
 
 Log out the session with B<logout> unless not logged in.
