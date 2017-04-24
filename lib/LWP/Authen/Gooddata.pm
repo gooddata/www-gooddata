@@ -12,10 +12,10 @@ LWP::Authen::Gooddata - Handle GoodData HTTP authentication mechanism
 =head1 SYNOPSIS
 
   use WWW::GoodData::Agent;
-  my $agent = new WWW::GoodData::Agent ('https://secure.gooddata.com/gdc');
+  my $agent = WWW::GoodData::Agent->new('https://secure.gooddata.com/gdc');
   $agent->post ('/gdc/account/login', ...);
   # The authentication cookie gets obtained transparently here
-  $agent->get ('/gdc/md');
+  $agent->get('/gdc/md');
 
 =head1 DESCRIPTION
 
@@ -38,8 +38,7 @@ Called by LWP::UserAgent internally.
 
 =cut
 
-sub authenticate
-{
+sub authenticate {
 	my ($class, $agent, $proxy, $challenge, $response,
 		$request, $arg, $size) = @_;
 
@@ -63,11 +62,11 @@ sub authenticate
 	}
 
 	# Refresh the token
-	$agent->{GDCAuthTT} = $agent->get (new URI ($token_uri),
+	$agent->{GDCAuthTT} = $agent->get(URI->new($token_uri),
 		'X-GDC-AuthSST' => $agent->{GDCAuthSST})->{userToken}{token};
 
-	$agent->default_header ('X-GDC-AuthTT' => $agent->{GDCAuthTT});
-	$request->header (Cookie => '');
+	$agent->default_header('X-GDC-AuthTT' => $agent->{GDCAuthTT});
+	$request->header(Cookie => '');
 
 	# Retry the request
 	return $agent->simple_request ($request);

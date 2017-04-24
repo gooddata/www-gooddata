@@ -26,6 +26,7 @@ use strict;
 use warnings;
 
 use base qw/LWP::UserAgent/;
+
 use JSON;
 
 our $VERSION = '1.12';
@@ -56,17 +57,17 @@ cookie storage and sets the B<Accept> header to prefer JSON content.
 
 =cut
 
-sub new
-{
+sub new {
 	my ($self, $root, @args) = @_;
-	$self = $self->SUPER::new (@args);
+	$self = $self->SUPER::new(@args);
 	$self->{root} = $root;
-	$self->agent ("perl-WWW-GoodData/$VERSION ");
+	$self->agent("perl-WWW-GoodData/$VERSION ");
 	# Not backed by a file yet
-	$self->cookie_jar ({});
+	$self->cookie_jar({});
 	# Prefer JSON, but deal with whatever else comes in, instead of letting backend return 406s
-	$self->default_header (Accept =>
-		'application/json;q=0.9, text/plain;q=0.2, */*;q=0.1');
+	$self->default_header(
+		Accept => 'application/json;q=0.9, text/plain;q=0.2, */*;q=0.1',
+	);
 	return $self;
 }
 
@@ -82,12 +83,11 @@ The rest of parameters are passed to L<LWP::UserAgent> untouched.
 
 =cut
 
-sub post
-{
+sub post {
 	my ($self, $uri, $body, @args) = @_;
-	push @args,'Content-Type' => 'application/json',
-		Content => encode_json ($body);
-	return $self->SUPER::post ($uri, @args);
+	push @args, 'Content-Type' => 'application/json',
+		Content => encode_json($body);
+	return $self->SUPER::post($uri, @args);
 }
 
 =item put URI, BODY, PARAMS
@@ -102,12 +102,11 @@ The rest of parameters are passed to L<LWP::UserAgent> untouched.
 
 =cut
 
-sub put
-{
+sub put {
 	my ($self, $uri, $body, @args) = @_;
-	push @args,'Content-Type' => 'application/json',
-		Content => encode_json ($body);
-	return $self->SUPER::put ($uri, @args);
+	push @args, 'Content-Type' => 'application/json',
+		Content => encode_json($body);
+	return $self->SUPER::put($uri, @args);
 }
 
 =item delete URI
@@ -116,12 +115,10 @@ Convenience method for constructing and issuing a DELETE request.
 
 =cut
 
-sub delete
-{
-	my $self = shift;
-	my $uri = shift;
+sub delete {
+	my ($self, $uri) = @_;
 
-	return $self->request (new HTTP::Request (DELETE => $uri, \@_));
+	return $self->request(HTTP::Request->new(DELETE => $uri, \@_));
 }
 
 =item request PARAMS
@@ -136,8 +133,7 @@ and known content types (JSON) are decoded.
 
 =cut
 
-sub request
-{
+sub request {
 	my ($self, $request, @args) = @_;
 
 	# Ignore Basic authentication for our requests
@@ -145,14 +141,14 @@ sub request
 	local %{'LWP::Authen::Basic::'} = (dummy => 'stash');
 
 	# URI relative to root
-	$request->uri ($request->uri->abs ($self->{root}));
+	$request->uri($request->uri->abs($self->{root}));
 
 	# Level 2 authentication
-	$request->header ('X-GDC-AuthTT' => $self->{GDCAuthTT})
+	$request->header('X-GDC-AuthTT' => $self->{GDCAuthTT})
 		if $self->{GDCAuthTT};
 
 	# Issue the request
-	my $response = $self->SUPER::request ($request, @args);
+	my $response = $self->SUPER::request($request, @args);
 
 	# Pass processed response from subrequest (redirect)
 	return $response if not defined $response or ref $response eq 'HASH';
@@ -161,10 +157,10 @@ sub request
 	return undef if $response->code == 204;
 
 	# Decode
-	my $decoded = eval { decode_json ($response->content) }
-		if $response->header ('Content-Type') =~ /^application\/json(;.*)?/;
+	my $decoded = eval { decode_json($response->content) }
+		if $response->header('Content-Type') =~ /^application\/json(;.*)?/;
 	$decoded = {
-		type => $response->header ('Content-Type'),
+		type => $response->header('Content-Type'),
 		raw => $response->content,
 	} unless $decoded;
 
@@ -172,10 +168,10 @@ sub request
 	unless ($response->is_success) {
 		# Apache::Error exceptions lack error wrapper
 		$decoded = $decoded->{error} if exists $decoded->{error};
-		my $request_id = $response->header ('X-GDC-Request') || "";
+		my $request_id = $response->header('X-GDC-Request') || "";
 		$request_id = " (Request ID: $request_id)" if $request_id;
 		die $response->status_line.$request_id unless exists $decoded->{message};
-		die sprintf ($decoded->{message}, @{$decoded->{parameters}}).$request_id;
+		die sprintf($decoded->{message}, @{$decoded->{parameters}}).$request_id;
 	}
 
 	return $decoded;
