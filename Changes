@@ -7,6 +7,7 @@
  - Add META.json and META.yml files.
  - Add minimal version of Perl.
  - Add README file.
+ - Add uploads() method.
  - Add verbose mode.
  - Fix database driver in doc of create_project.
  - Fix missing use strict and use warning.

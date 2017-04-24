@@ -616,6 +616,28 @@ sub upload {
 	return $self->poll($task_url);
 }
 
+=item B<uploads>
+
+Uploads to WebDAV service.
+
+=cut
+
+sub uploads {
+	my ($self, $file_path, $file, @collections) = @_;
+	my $uploads = URI->new($self->get_uri('uploads'));
+	foreach my $collection (@collections) {
+		$uploads->path_segments($uploads->path_segments, $collection);
+		$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
+	}
+	$uploads->path_segments($uploads->path_segments, $file);
+	$self->{agent}->request(HTTP::Request->new(
+		PUT => $uploads,
+		undef,
+		slurp_file($file_path),
+	));
+	return $uploads;
+}
+
 =item B<poll> TASK_URL
 
 Periodically checks status of task page and check 'wTaskStatus':'status' for 'RUNNING'.
@@ -817,6 +839,16 @@ L<https://secure.gooddata.com/gdc/> -- Browsable GoodData API
 =item *
 
 L<WWW::GoodData::Agent> -- GoodData API-aware user agent
+
+=back
+
+=head1 CAVEATS
+
+=over 8
+
+=item * uploads()
+
+Don't check, when collection exists.
 
 =back
 
