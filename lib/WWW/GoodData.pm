@@ -616,15 +616,20 @@ sub upload {
 	return $self->poll($task_url);
 }
 
-=item B<uploads>
+=item B<uploads> FILE_PATH FILE UPLOAD_PATH
 
 Uploads to WebDAV service.
 
 =cut
 
 sub uploads {
-	my ($self, $file_path, $file, @collections) = @_;
+	my ($self, $file_path, $upload_path) = @_;
+	if (! -r $file_path) {
+		die "Cannot read '$file_path' file for upload.";
+	}
 	my $uploads = URI->new($self->get_uri('uploads'));
+	my @collections = split m/\//ms, $upload_path;
+	my $file = pop @collections;
 	foreach my $collection (@collections) {
 		$uploads->path_segments($uploads->path_segments, $collection);
 		$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
