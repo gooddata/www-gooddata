@@ -23,6 +23,8 @@ wrapper funcitons for common actions.
 
 use strict;
 use warnings;
+
+use English;
 use WWW::GoodData::Agent;
 use JSON;
 use URI;
@@ -824,6 +826,61 @@ sub dd_pull {
 	)->{asyncTask}{link}{poll};
 
 	return $self->upload_poll($task_url);
+}
+
+=item B<uploads> FILE_PATH FILE UPLOAD_PATH
+
+Uploads to WebDAV service.
+
+=cut
+
+sub uploads {
+	my ($self, $file_path, $upload_path) = @_;
+	if (! -r $file_path) {
+		die "Cannot read '$file_path' file for upload.";
+	}
+	my $uploads = URI->new($self->get_uri('uploads'));
+	my @collections = split m/\//ms, $upload_path;
+	my $file = pop @collections;
+	foreach my $collection (@collections) {
+		$uploads->path_segments($uploads->path_segments, $collection);
+		if (! $self->_collection_exists($uploads)) {
+			$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
+		}
+	}
+	$uploads->path_segments($uploads->path_segments, $file);
+	$self->{agent}->request(HTTP::Request->new(
+		PUT => $uploads,
+		undef,
+		slurp_file($file_path),
+	));
+	return $uploads;
+}
+
+sub _collection_exists {
+	my ($self, $uploads) = @_;
+	my $wd_check_col_xml = <<'END';
+<?xml version="1.0"?>
+<propfind xmlns="DAV:">
+   <prop>
+      <resourcetype />
+   </prop>
+</propfind>
+END
+
+	# XXX Hack because WWW::GoodData::Agent changes LWP::UserAgent behavior.
+	eval {
+		$self->{agent}->request(HTTP::Request->new(
+			PROPFIND => $uploads,
+			undef,
+			$wd_check_col_xml,
+		));
+	};
+	if ($EVAL_ERROR =~ '^404') {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 =item B<DESTROY>
