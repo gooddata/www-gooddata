@@ -24,6 +24,7 @@ wrapper funcitons for common actions.
 use strict;
 use warnings;
 
+use English;
 use WWW::GoodData::Agent;
 use JSON;
 use URI;
@@ -632,7 +633,9 @@ sub uploads {
 	my $file = pop @collections;
 	foreach my $collection (@collections) {
 		$uploads->path_segments($uploads->path_segments, $collection);
-		$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
+		if (! $self->_collection_exists($uploads)) {
+			$self->{agent}->request(HTTP::Request->new(MKCOL => $uploads));
+		}
 	}
 	$uploads->path_segments($uploads->path_segments, $file);
 	$self->{agent}->request(HTTP::Request->new(
@@ -641,6 +644,32 @@ sub uploads {
 		slurp_file($file_path),
 	));
 	return $uploads;
+}
+
+sub _collection_exists {
+	my ($self, $uploads) = @_;
+	my $wd_check_col_xml = <<'END';
+<?xml version="1.0"?>
+<propfind xmlns="DAV:">
+   <prop>
+      <resourcetype />
+   </prop>
+</propfind>
+END
+
+	# XXX Hack because WWW::GoodData::Agent changes LWP::UserAgent behavior.
+	eval {
+		$self->{agent}->request(HTTP::Request->new(
+			PROPFIND => $uploads,
+			undef,
+			$wd_check_col_xml,
+		));
+	};
+	if ($EVAL_ERROR =~ '^404') {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 =item B<poll> TASK_URL
