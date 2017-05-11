@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
       use WWW::GoodData;
       my $gdc = new WWW::GoodData;
-      print $gdc->get_uri ('md', { title => 'My Project' });
+      print $gdc->get_uri('md', { title => 'My Project' });
 
 DESCRIPTION
     WWW::GoodData is the client for GoodData JSON-based API built atop
@@ -24,10 +24,27 @@ METHODS
 
         agent   A WWW::GoodData::Agent instance to use.
 
+        auto_destroy
+                Sets automatic logout in destroying object.
+
+                Defaults to 1.
+
         retries A number of retries to obtain results of asynchronous tasks,
                 such as report exports or data uploads. See poll.
 
                 Defaults to 3600 (delay of one hour).
+
+        verbose Adds handler for printing of request information to agent
+                When versbose mode is set. Password in 'postUserLogin'
+                parameter will be hidden.
+
+                Examples of verbose output: GET
+                https://secure.gooddata.com/gdc POST
+                https://secure.gooddata.com/gdc/account/login
+                {"postUserLogin":{"login":"bear@gooddata.com","verify_level"
+                :2,"remember":0,"password":"***"}}
+
+                Defaults to 0.
 
     links PATH
         Traverse the links in resource hierarchy following given PATH,
@@ -37,7 +54,7 @@ METHODS
         properties of a link. If a plain string is specified, it is
         considered to be a match against category property:
 
-          $gdc->links ('md', { 'category' => 'projects' });
+          $gdc->links('md', { 'category' => 'projects' });
 
         The above call returns a list of all projects, with links to their
         metadata resources.
@@ -72,7 +89,7 @@ METHODS
         The list of valid project templates is available from the template
         server: <https://secure.gooddata.com/projectTemplates/>.
 
-        Valid db engine drivers are 'Pg' (default) and 'mysql'.
+        Valid db engine drivers are 'Pg' (default) and 'vertica'.
 
     create_user DOMAIN EMAIL LOGIN PASSWORD FIRST_NAME LAST_NAME PHONE
     COMPANY SSO_PROVIDER
@@ -107,14 +124,14 @@ METHODS
         Upload and integrate a new data load via Single Loading Interface
         (SLI).
 
-    poll BODY CONDITION
-        Should only be used internally.
+    uploads FILE_PATH FILE UPLOAD_PATH
+        Uploads to WebDAV service.
 
-        Run BODY passing its return value to call to CONDITION until it
-        evaluates to true or retries (see properties) times out.
+    poll TASK_URL
+        Periodically checks status of task page and check
+        'wTaskStatus':'status' for 'RUNNING'.
 
-        Returns value is of last iteration of BODY in case CONDITION
-        succeeds, otherwise undefined (in case of timeout).
+        Returns undef is status is OK.
 
     create_object_with_expression PROJECT URI TYPE TITLE SUMMARY EXPRESSION
         Create a new metadata object of type TYPE with EXPRESSION as the
@@ -126,12 +143,21 @@ METHODS
     DESTROY
         Log out the session with logout unless not logged in.
 
+    dd_pull PROJECT ZIP_FILE DATASETS
+        Integrate a custom date dimension load via Single Loading Interface
+        (SLI).
+
 SEE ALSO
     *   <http://developer.gooddata.com/api/> -- API documentation
 
     *   <https://secure.gooddata.com/gdc/> -- Browsable GoodData API
 
     *   WWW::GoodData::Agent -- GoodData API-aware user agent
+
+CAVEATS
+    *       uploads()
+
+            Don't check, when collection exists.
 
 LICENSE AND COPYRIGHT
     Copyright 2017 Michal Josef Spacek
