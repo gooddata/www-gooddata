@@ -60,7 +60,7 @@
          "http://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "https://github.com/tupinek/www-gooddata"
+         "url" : "https://github.com/gooddata/www-gooddata"
       }
    },
    "version" : "1.12"
