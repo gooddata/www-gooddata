@@ -899,13 +899,15 @@ under the same terms as Perl itself.
 
 =head1 AUTHORS
 
-Lubomir Rintel C<lkundrak@v3.sk>
-
-Adam Stulpa C<adam.stulpa@gooddata.com>
+Tomas Janousek C<tomi@nomi.cz>
 
 Jan Orel C<jan.orel@gooddata.com>
 
-Tomas Janousek C<tomi@nomi.cz>
+Lubomir Rintel C<lkundrak@v3.sk>
+
+Michal Josef Spacek C<michal.spacek@gooddata.com>
+
+Adam Stulpa C<adam.stulpa@gooddata.com>
 
 =cut
 

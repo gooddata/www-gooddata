@@ -206,6 +206,8 @@ under the same terms as Perl itself.
 
 =head1 AUTHOR
 
+Michal Josef Spacek <michal.spacek@gooddata.com>
+
 Lubomir Rintel C<lkundrak@v3.sk>
 
 =cut
