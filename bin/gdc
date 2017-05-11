@@ -33,6 +33,8 @@ my $password;
 my $project;
 my $root;
 
+our $VERSION = '1.12';
+
 =head1 OPTIONS
 
 =over 4
@@ -74,7 +76,7 @@ Defaults to L<https://secure.gooddata.com/gdc/>.
 =cut
 
 new Getopt::Long::Parser (
-	config => [qw/require_order/]
+	config => [qw/require_order no_ignore_case/]
 )->getoptions (
 	'u|user=s' => \$user,
 	'p|password=s' => \$password,
@@ -137,6 +139,8 @@ command is specified.
 
 sub shell
 {
+	my $gdc = shift;
+
 	my $readline = new Term::ReadLine ('WWW::GoodData shell');
 	while (1) {
 		my $line = $readline->readline ("> ");
@@ -145,7 +149,7 @@ sub shell
 		my ($command, @args) = shellwords ($line);
 		next unless defined $command;
 		if (exists $actions{$command}) {
-			eval { $actions{$command}->(@args) };
+			eval { $actions{$command}->($gdc, @args) };
 			warn $@ if $@;
 		} else {
 			warn 'No such command';
@@ -179,6 +183,8 @@ Alternative way to specifiy user password.
 
 sub login
 {
+	my $gdc = shift;
+
 	undef $password;
 	GetOptionsFromArray (\@_,
 		'u|user=s' => \$user,
@@ -202,6 +208,8 @@ Automatically done upon utility exit.
 
 sub logout
 {
+	my $gdc = shift;
+
 	$gdc->logout;
 }
 
@@ -224,6 +232,8 @@ No checking is done with the project URI.
 
 sub project
 {
+	my $gdc = shift;
+
 	my $this_project;
 	GetOptionsFromArray (\@_,
 		'P|project=s' => \$this_project,
@@ -254,6 +264,8 @@ Add unnecessary details.
 
 sub lsprojects
 {
+	my $gdc = shift;
+
 	my $long;
 
 	GetOptionsFromArray (\@_,
@@ -292,6 +304,8 @@ See global B<--project> option for the detailed description.
 
 sub lsroles
 {
+	my $gdc = shift;
+
 	my $this_project = $project;
 
 	GetOptionsFromArray (\@_,
@@ -323,6 +337,8 @@ See global B<--project> option for the detailed description.
 
 sub rmproject
 {
+	my $gdc = shift;
+
 	my $project = $project;
 	GetOptionsFromArray (\@_,
 		'P|project=s' => \$project,
@@ -385,6 +401,8 @@ User company's DNS suffix, if SSO is used.
 
 sub mkuser
 {
+	my $gdc = shift;
+
 	my $domain = '/gdc/account/domains/default';
 	my $email;
 	my $login;
@@ -452,6 +470,8 @@ Authorization token.
 
 sub mkproject
 {
+	my $gdc = shift;
+
 	my $title;
 	my $summary = '';
 	my $template;
@@ -497,6 +517,8 @@ Add unnecessary details.
 
 sub lsreports
 {
+	my $gdc = shift;
+
 	my $long;
 	my $project = $project;
 
@@ -552,6 +574,8 @@ Can be unspecified if file name ends with a dot and format name
 
 sub export
 {
+	my $gdc = shift;
+
 	my $report;
 	my $file;
 	my $format;
@@ -598,6 +622,8 @@ File to place the result into.
 
 sub model
 {
+	my $gdc = shift;
+
 	my $long;
 	my $project = $project;
 	my $file;
@@ -642,6 +668,8 @@ Read MAQL script from specified file.
 
 sub chmodel
 {
+	my $gdc = shift;
+
 	my $long;
 	my $project = $project;
 	my $maql;
@@ -684,6 +712,8 @@ SLI Manifest of the upload.
 
 sub upload
 {
+	my $gdc = shift;
+
 	my $long;
 	my $project = $project;
 	my $file;
@@ -737,6 +767,8 @@ See global B<--project> option for the detailed description.
 
 sub mkobject
 {
+	my $gdc = shift;
+
 	my $project = $project;
 	my $uri;
 	my $type;
@@ -803,6 +835,8 @@ See global B<--project> option for the detailed description.
 
 sub mkreportdef
 {
+	my $gdc = shift;
+
 	my $project = $project;
 	my $uri;
 	my $title;
@@ -837,6 +871,8 @@ Print list of available commands.
 
 sub help
 {
+	my $gdc = shift;
+
 	GetOptionsFromArray (\@_)
 		or die 'Bad arguments to help';
 	die 'Extra arguments' if @_;
@@ -845,10 +881,10 @@ sub help
 		map { "\t$_" } sort keys %actions ;
 }
 
-login ($user, $password ? "$password" : undef) if defined $user;
+login ($gdc, $user, $password ? "$password" : undef) if defined $user;
 pod2usage ("No such command exists: '$command'")
 	unless exists $actions{$command};
-$actions{$command}->(@ARGV);
+$actions{$command}->($gdc, @ARGV);
 
 =head1 SEE ALSO
 
@@ -872,9 +908,11 @@ L<LWP::UserAgent> -- Perl HTTP client
 
 =back
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
-Copyright 2011, 2012, 2013 Lubomir Rintel
+Copyright 2017 Michal Josef Spacek
+
+Copyright 2011, 2012, 2013, 2014 Lubomir Rintel
 
 Copyright 2012, 2013 Adam Stulpa, Tomas Janousek
 

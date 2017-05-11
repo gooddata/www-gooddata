@@ -1,0 +1,154 @@
+NAME
+    WWW::GoodData - Client library for GoodData REST-ful API
+
+SYNOPSIS
+      use WWW::GoodData;
+      my $gdc = new WWW::GoodData;
+      print $gdc->get_uri ('md', { title => 'My Project' });
+
+DESCRIPTION
+    WWW::GoodData is the client for GoodData JSON-based API built atop
+    WWW::GoodData::Agent client agent, with focus on usefullness and
+    correctness of implementation.
+
+    It provides code for navigating the REST-ful API structure as well as
+    wrapper funcitons for common actions.
+
+METHODS
+    new [PARAMS]
+        Create a new client instance.
+
+        You can optionally pass a hash reference with properties that would
+        be blessed, otherwise a new one is created. Possible properties
+        include:
+
+        agent   A WWW::GoodData::Agent instance to use.
+
+        retries A number of retries to obtain results of asynchronous tasks,
+                such as report exports or data uploads. See poll.
+
+                Defaults to 3600 (delay of one hour).
+
+    links PATH
+        Traverse the links in resource hierarchy following given PATH,
+        starting from API root ("gdc" by default).
+
+        PATH is an array of dictionaries, where each key-value pair matches
+        properties of a link. If a plain string is specified, it is
+        considered to be a match against category property:
+
+          $gdc->links ('md', { 'category' => 'projects' });
+
+        The above call returns a list of all projects, with links to their
+        metadata resources.
+
+    get_uri PATH
+        Follows the same samentics as links() call, but returns an URI of
+        the first matching resource instead of complete link structure.
+
+    login EMAIL PASSWORD
+        Obtain a SST (login token).
+
+    logout
+        Make server invalidate the client session and drop credential
+        tokens.
+
+        Is called upon destruction of the GoodData client instance.
+
+    change_passwd OLD NEW
+        Change user password given the old and new password.
+
+    projects
+        Return array of links to project resources on metadata server.
+
+    delete_project IDENTIFIER
+        Delete a project given its identifier.
+
+    create_project TITLE SUMMARY TEMPLATE DRIVER TOKEN
+        Create a project given its title and optionally summary, project
+        template, db engine driver and authorization token return its
+        identifier.
+
+        The list of valid project templates is available from the template
+        server: <https://secure.gooddata.com/projectTemplates/>.
+
+        Valid db engine drivers are 'Pg' (default) and 'mysql'.
+
+    create_user DOMAIN EMAIL LOGIN PASSWORD FIRST_NAME LAST_NAME PHONE
+    COMPANY SSO_PROVIDER
+        Create a user given its email, login, password, first name, surname,
+        phone and optionally company, sso provider in domain.
+
+        Returns user identifier (URI).
+
+    get_roles PROJECT
+        Gets project roles.
+
+        Return array of project roles.
+
+    reports PROJECT
+        Return array of links to repoort resources on metadata server.
+
+    compute_report REPORT
+        Trigger a report computation and return the URI of the result
+        resource.
+
+    export_report REPORT FORMAT
+        Submit an exporter task for a computed report (see compute_report),
+        wait for completion and return raw data in desired format.
+
+    ldm_picture PROJECT
+        Return picture of Logical Data Model (LDM) in PNG format.
+
+    ldm_manage PROJECT MAQL
+        Execute MAQL statement for a project.
+
+    upload PROJECT MANIFEST
+        Upload and integrate a new data load via Single Loading Interface
+        (SLI).
+
+    poll BODY CONDITION
+        Should only be used internally.
+
+        Run BODY passing its return value to call to CONDITION until it
+        evaluates to true or retries (see properties) times out.
+
+        Returns value is of last iteration of BODY in case CONDITION
+        succeeds, otherwise undefined (in case of timeout).
+
+    create_object_with_expression PROJECT URI TYPE TITLE SUMMARY EXPRESSION
+        Create a new metadata object of type TYPE with EXPRESSION as the
+        only content.
+
+    create_report_definition PROJECT URI TITLE SUMMARY METRICS DIM FILTERS
+        Create a new reportDefinition in metadata.
+
+    DESTROY
+        Log out the session with logout unless not logged in.
+
+SEE ALSO
+    *   <http://developer.gooddata.com/api/> -- API documentation
+
+    *   <https://secure.gooddata.com/gdc/> -- Browsable GoodData API
+
+    *   WWW::GoodData::Agent -- GoodData API-aware user agent
+
+LICENSE AND COPYRIGHT
+    Copyright 2017 Michal Josef Spacek
+
+    Copyright 2011, 2012, 2013 Lubomir Rintel
+
+    Copyright 2012, 2013 Adam Stulpa, Jan Orel, Tomas Janousek
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+AUTHORS
+    Lubomir Rintel "lkundrak@v3.sk"
+
+    Adam Stulpa "adam.stulpa@gooddata.com"
+
+    Jan Orel "jan.orel@gooddata.com"
+
+    Tomas Janousek "tomi@nomi.cz"
+

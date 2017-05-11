@@ -1,10 +1,25 @@
 bin/gdc				Client utility for GoodData REST-ful API
+Build.PL			Build script
+Changes
+CONTRIBUTING			How to add functionality
+ISSUES				API issues
+lib/LWP/Authen/Gooddata.pm	Handle GoodData HTTP authentication mechanism
 lib/WWW/GoodData.pm		Client library for GoodData REST-ful API
 lib/WWW/GoodData/Agent.pm	HTTP client for GoodData JSON-based API
-lib/LWP/Authen/Gooddata.pm	Handle GoodData HTTP authentication mechanism
-Build.PL			Build script
+LICENSE
 MANIFEST			This list of files
+META.json
 META.yml			Distribution Metadata
-t/pod.t				POD test
-t/require.t			Compilation test
-ISSUES				API issues
+README
+t/LWP-Authen-Gooddata/01-use.t
+t/LWP-Authen-Gooddata/02-version.t
+t/WWW-GoodData-Agent/01-use.t
+t/WWW-GoodData-Agent/02-version.t
+t/WWW-GoodData/01-use.t
+t/WWW-GoodData/02-version.t
+xt/LWP-Authen-Gooddata/01-pod_coverage.t
+xt/LWP-Authen-Gooddata/02-pod.t
+xt/WWW-GoodData-Agent/01-pod_coverage.t
+xt/WWW-GoodData-Agent/02-pod.t
+xt/WWW-GoodData/01-pod_coverage.t
+xt/WWW-GoodData/02-pod.t
