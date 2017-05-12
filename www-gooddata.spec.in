@@ -1,0 +1,38 @@
+Name:             %PACKAGE_NAME%
+Summary:          Client library for GoodData REST-ful API
+Version:          %VERSION%
+Release:          %RELEASE%
+Vendor:           GoodData
+Group:            Applications/Productivity
+
+License:          GoodData
+URL:              https://github.com:gooddata/www-gooddata.git
+Source0:          %{name}-%{version}.tar
+BuildRoot:        %{_tmppath}/%{name}-%{version}-root
+Requires:         perl
+BuildRequires:    perl perl-Module-Build
+
+%description
+WWW::GoodData is the client for GoodData JSON-based API built atop
+WWW::GoodData::Agent client agent, with focus on usefullness and
+correctness of implementation.
+
+It provides code for navigating the REST-ful API structure as well as
+wrapper funcitons for common actions.
+
+%prep
+%setup -q -c
+
+%build
+perl ./Build.PL
+
+%install
+./Build install destdir=$RPM_BUILD_ROOT/
+find "$RPM_BUILD_ROOT" -type f -o -type l |
+    sed "s|^${RPM_BUILD_ROOT}||" > mainpkg.files
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+rm -Rf mainpkg.files
+
+%files -f mainpkg.files
