@@ -667,6 +667,7 @@ sub upload_poll
 
 	return if $result->{wTaskStatus}{status} eq 'OK';
 
+	warn 'Upload finished with warnings' if $result->{taskStatus} eq 'WARNING';
 	die
 		'Upload finished with '.$result->{wTaskStatus}{status}." status and message:\n"
 		. $result->{wTaskStatus}{messages}[0]{error}{message} . "\nand parameters:\n"
