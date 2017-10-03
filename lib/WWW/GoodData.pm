@@ -662,7 +662,7 @@ sub upload_poll
 	# Wait for the task to enter a stable state
 	my $result = $self->poll (
 		sub { $self->{agent}->get ($task) },
-		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING)$/ }
+		sub { shift->{wTaskStatus}{status} !~ /^(RUNNING|PREPARED)$/ }
 	) or die 'Timed out waiting for integration to finish';
 
 	return if $result->{wTaskStatus}{status} eq 'OK';
