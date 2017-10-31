@@ -80,6 +80,10 @@ sub get_canonical_links
 
 	unless ($links{$root}) {
 		my $response = $self->{agent}->get ($root);
+
+		# XXX Remove paging section (used in /gdc/account/profile/666/projects), which breaks this code.
+		delete $response->{paging} if exists $response->{paging};
+
 		# Various ways to get the links
 		if (exists $response->{about}) {
 			# Ordinary structure with about section
