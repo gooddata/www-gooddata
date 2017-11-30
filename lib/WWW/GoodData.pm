@@ -69,6 +69,29 @@ sub new
 	return $self;
 }
 
+sub upload_poll_check
+{
+        my $self = shift;
+        my $task = shift;
+
+        # Wait for the task to enter a stable state
+        return $self->poll_check (
+                sub { $self->{agent}->get ($task) },
+                sub { shift->{wTaskStatus}{status} !~ /^(RUNNING|PREPARED)$/ }
+        );
+}
+
+sub poll_check
+{
+        my $self = shift;
+        my ($body, $cond) = @_;
+
+        my $ret = $body->();
+        return 1 if $cond->($ret);
+
+        return 0;
+}
+
 # API hierarchy traversal Cache
 our %links;
 sub get_canonical_links
